@@ -4,7 +4,7 @@ import os.path
 import pandas as pd
 
 match_info = ["Season",
-              "Div",
+              "League",
               "Date",
               "HomeTeam",
               "AwayTeam"]
