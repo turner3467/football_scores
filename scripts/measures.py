@@ -99,8 +99,7 @@ def goals_conceded(df, team, n_games):
     return conceded
     
 def form_measures(idx, df):
-    """Master function to calculate form based measures. Main purpose of this function is to provide a filtered
-    dataframe to sub-functions which will calculate individual measures. See measures.md for description of measures."""
+    """Return list of form based measures using individual helper functions."""
 
     date, home_team, away_team = df.loc[idx, ["Date", "HomeTeam", "AwayTeam"]]
 
