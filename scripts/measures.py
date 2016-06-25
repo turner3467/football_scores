@@ -37,6 +37,11 @@ match_statistics = ["FTHG",
                     "ABP"]
 
 def get_measures():
+    """Returns measures dataframe.
+
+    If measures file does not exists, it uses a filtered down version of the raw historical scores csv.
+    """
+
     if os.path.isfile("../data/processed/measures.csv"):
         measures = pd.read_csv("../data/processed/measures.csv")
         measures.Date = pd.to_datetime(measures.Date)
@@ -50,8 +55,7 @@ def get_measures():
         return measures
 
 def team_win_percentage(df, team, n_games):
-    """Team win percentage. Sub-function of form based measures. Think about including home-away specific measures
-    in this function."""
+    """Returns the team win percentage from last n games."""
 
     temp_df = df[(df.HomeTeam == team) | (df.AwayTeam == team)]
     temp_df = temp_df.sort_values("Date", ascending=False).head(n_games)[["HomeTeam", "AwayTeam", "FTR"]]
@@ -63,7 +67,16 @@ def team_win_percentage(df, team, n_games):
     return round(win_percent, 2)
 
 def team_lose_percentage(df, team, n_games):
-# TODO: write this function
+    """Returns the team win percentage from last n games."""
+
+    temp_df = df[(df.HomeTeam == team) | (df.AwayTeam == team)]
+    temp_df = temp_df.sort_values("Date", ascending=False).head(n_games)[["HomeTeam", "AwayTeam", "FTR"]]
+    if len(temp_df) < n_games:
+        return "NaN"
+    loses = ((temp_df.HomeTeam == team) & (temp_df.FTR == "A")) | \
+           ((temp_df.AwayTeam == team) & (temp_df.FTR == "H"))
+    lose_percent = loses.sum() / n_games
+    return round(lose_percent, 2)
 
 def form_measures(idx, df)
     """Master function to calculate form based measures. Main purpose of this function is to provide a filtered
@@ -78,6 +91,32 @@ def form_measures(idx, df)
     temp_df = df[row_filter]
 
     home_team_win_percent_last_5 = team_win_percentage(temp_df, home_team, 5)
+    home_team_win_percent_last_10 = team_win_percentage(temp_df, home_team, 10)
+    home_team_win_percent_last_15 = team_win_percentage(temp_df, home_team, 15)
+    away_team_win_percent_last_5 = team_win_percentage(temp_df, away_team, 5)
+    away_team_win_percent_last_10 = team_win_percentage(temp_df, away_team, 10)
+    away_team_win_percent_last_15 = team_win_percentage(temp_df, away_team, 15)
+    home_team_lose_percent_last_5 = team_lose_percentage(temp_df, home_team, 5)
+    home_team_lose_percent_last_10 = team_lose_percentage(temp_df, home_team, 10)
+    home_team_lose_percent_last_15 = team_lose_percentage(temp_df, home_team, 15)
+    away_team_lose_percent_last_5 = team_lose_percentage(temp_df, away_team, 5)
+    away_team_lose_percent_last_10 = team_lose_percentage(temp_df, away_team, 10)
+    away_team_lose_percent_last_15 = team_lose_percentage(temp_df, away_team, 15)
+
+    output_list = [home_team_win_percent_last_5,
+                   home_team_win_percent_last_10,
+                   home_team_win_percent_last_15,
+                   away_team_win_percent_last_5,
+                   away_team_win_percent_last_10,
+                   away_team_win_percent_last_15,
+                   home_team_lose_percent_last_5,
+                   home_team_lose_percent_last_10,
+                   home_team_lose_percent_last_15,
+                   away_team_lose_percent_last_5,
+                   away_team_lose_percent_last_10,
+                   away_team_lose_percent_last_15]
+
+    return output_list
 
 def main():
     measures = get_measures()
@@ -85,7 +124,7 @@ def main():
     raw_data = pd.read_csv("../data/processed/historical_scores.csv", index_col=0)
     raw_data = raw_data[match_info + match_statistics]
     raw_data.Date = pd.to_datetime(raw_data.Date)
-    raw_data = raw_data.reset_index()
+    raw_data = raw_data.reset_index() 
 
 if __name__ == "__main__":
     main()
