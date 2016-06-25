@@ -78,7 +78,7 @@ def team_lose_percentage(df, team, n_games):
     lose_percent = loses.sum() / n_games
     return round(lose_percent, 2)
 
-def form_measures(idx, df)
+def form_measures(idx, df):
     """Master function to calculate form based measures. Main purpose of this function is to provide a filtered
     dataframe to sub-functions which will calculate individual measures. See measures.md for description of measures."""
 
@@ -124,7 +124,9 @@ def main():
     raw_data = pd.read_csv("../data/processed/historical_scores.csv", index_col=0)
     raw_data = raw_data[match_info + match_statistics]
     raw_data.Date = pd.to_datetime(raw_data.Date)
-    raw_data = raw_data.reset_index() 
+    raw_data = raw_data.reset_index()
+
+    print(form_measures(551, raw_data))
 
 if __name__ == "__main__":
     main()
