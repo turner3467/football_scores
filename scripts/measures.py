@@ -78,6 +78,26 @@ def team_lose_percentage(df, team, n_games):
     lose_percent = loses.sum() / n_games
     return round(lose_percent, 2)
 
+def goals_scored(df, team, n_games):
+    """Returns the goals scored by team from last n games."""
+
+    temp_df = df[(df.HomeTeam == team) | (df.AwayTeam == team)]
+    temp_df = temp_df.sort_values("Date", ascending=False).head(n_games)[["HomeTeam", "AwayTeam", "FTHG", "FTAG"]]
+    if len(temp_df) < n_games:
+        return "NaN"
+    scored = temp_df[temp_df.HomeTeam == team]["FTHG"].sum() + temp_df[temp_df.AwayTeam == team]["FTAG"].sum()
+    return scored
+
+def goals_conceded(df, team, n_games):
+    """Returns the goals conceded by team from last n games."""
+
+    temp_df = df[(df.HomeTeam == team) | (df.AwayTeam == team)]
+    temp_df = temp_df.sort_values("Date", ascending=False).head(n_games)[["HomeTeam", "AwayTeam", "FTHG", "FTAG"]]
+    if len(temp_df) < n_games:
+        return "NaN"
+    conceded = temp_df[temp_df.HomeTeam == team]["FTAG"].sum() + temp_df[temp_df.AwayTeam == team]["FTHG"].sum()
+    return conceded
+    
 def form_measures(idx, df):
     """Master function to calculate form based measures. Main purpose of this function is to provide a filtered
     dataframe to sub-functions which will calculate individual measures. See measures.md for description of measures."""
@@ -89,7 +109,8 @@ def form_measures(idx, df):
                                df.AwayTeam.isin([home_team, away_team]))
 
     temp_df = df[row_filter]
-
+    
+    # win/lose percent measures
     home_team_win_percent_last_5 = team_win_percentage(temp_df, home_team, 5)
     home_team_win_percent_last_10 = team_win_percentage(temp_df, home_team, 10)
     home_team_win_percent_last_15 = team_win_percentage(temp_df, home_team, 15)
@@ -102,6 +123,20 @@ def form_measures(idx, df):
     away_team_lose_percent_last_5 = team_lose_percentage(temp_df, away_team, 5)
     away_team_lose_percent_last_10 = team_lose_percentage(temp_df, away_team, 10)
     away_team_lose_percent_last_15 = team_lose_percentage(temp_df, away_team, 15)
+    
+    # goals scored/conceded measures
+    home_team_goals_scored_last_5 = goals_scored(temp_df, home_team, 5)
+    home_team_goals_scored_last_10 = goals_scored(temp_df, home_team, 10)
+    home_team_goals_scored_last_15 = goals_scored(temp_df, home_team, 15)
+    away_team_goals_scored_last_5 = goals_scored(temp_df, away_team, 5)
+    away_team_goals_scored_last_10 = goals_scored(temp_df, away_team, 10)
+    away_team_goals_scored_last_15 = goals_scored(temp_df, away_team, 15)
+    home_team_goals_conceded_last_5 = goals_conceded(temp_df, home_team, 5)
+    home_team_goals_conceded_last_10 = goals_conceded(temp_df, home_team, 10)
+    home_team_goals_conceded_last_15 = goals_conceded(temp_df, home_team, 15)
+    away_team_goals_conceded_last_5 = goals_conceded(temp_df, away_team, 5)
+    away_team_goals_conceded_last_10 = goals_conceded(temp_df, away_team, 10)
+    away_team_goals_conceded_last_15 = goals_conceded(temp_df, away_team, 15)
 
     output_list = [home_team_win_percent_last_5,
                    home_team_win_percent_last_10,
@@ -114,7 +149,19 @@ def form_measures(idx, df):
                    home_team_lose_percent_last_15,
                    away_team_lose_percent_last_5,
                    away_team_lose_percent_last_10,
-                   away_team_lose_percent_last_15]
+                   away_team_lose_percent_last_15,
+                   home_team_goals_scored_last_5,
+                   home_team_goals_scored_last_10,
+                   home_team_goals_scored_last_15,
+                   away_team_goals_scored_last_5,
+                   away_team_goals_scored_last_10,
+                   away_team_goals_scored_last_15,
+                   home_team_goals_conceded_last_5,
+                   home_team_goals_conceded_last_10,
+                   home_team_goals_conceded_last_15,
+                   away_team_goals_conceded_last_5,
+                   away_team_goals_conceded_last_10,
+                   away_team_goals_conceded_last_15]
 
     return output_list
 
