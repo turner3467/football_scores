@@ -22,12 +22,16 @@
 *Away team goals scored away per game over last 5,10, 15 games
 *Away team goals conceded away per game over last 5, 10, 15 games
 
-### Last game measures
+### Last game measures for 
 
-*Win - yes/no
-*Lose - yes/no
-*Goals scored
-*Goals conceded
+*Home win - yes/no
+*Home lose - yes/no
+*Home goals scored
+*Home goals conceded
+*Away win - yes/no
+*Away lose - yes/no
+*Away goals scored
+*Away goals conceded
 
 ### Head-to-head measures
 
@@ -35,3 +39,16 @@
 *Away team win % over last 5, 10, all time head-to-head games
 *Home team goals scored per game over last 5, 10, all time head-to-head games
 *Home team goals conceded per game over last 5, 10, all time head-to-head games
+
+### League Rank Based Measures
+to be refined.
+
+*Relative ranking between teams
+
+### Ranking weighted measures
+
+*Home team performance weighted by ranking of opposition (RoO)
+*Away team performance weighted by RoO
+*Goals scored weighted by RoO
+*Goals conceded weighted by RoO
+
