@@ -317,7 +317,84 @@ def main():
     raw_data.Date = pd.to_datetime(raw_data.Date)
     raw_data = raw_data.reset_index()
 
-    print(measures_main(35687, raw_data))
+    measures_list = ["home_team_win_percent_last_5",
+                   "home_team_win_percent_last_10",
+                   "home_team_win_percent_last_15",
+                   "away_team_win_percent_last_5",
+                   "away_team_win_percent_last_10",
+                   "away_team_win_percent_last_15",
+                   "home_team_lose_percent_last_5",
+                   "home_team_lose_percent_last_10",
+                   "home_team_lose_percent_last_15",
+                   "away_team_lose_percent_last_5",
+                   "away_team_lose_percent_last_10",
+                   "away_team_lose_percent_last_15",
+                   "home_team_goals_scored_last_5",
+                   "home_team_goals_scored_last_10",
+                   "home_team_goals_scored_last_15",
+                   "away_team_goals_scored_last_5",
+                   "away_team_goals_scored_last_10",
+                   "away_team_goals_scored_last_15",
+                   "home_team_goals_conceded_last_5",
+                   "home_team_goals_conceded_last_10",
+                   "home_team_goals_conceded_last_15",
+                   "away_team_goals_conceded_last_5",
+                   "away_team_goals_conceded_last_10",
+                   "away_team_goals_conceded_last_15",
+                   "home_team_win_percent_last_game",
+                   "away_team_win_percent_last_game",
+                   "home_team_lose_percent_last_game",
+                   "away_team_lose_percent_last_game",
+                   "home_team_goals_scored_last_game",
+                   "away_team_goals_scored_last_game",
+                   "home_team_goals_conceded_last_game",
+                   "away_team_goals_conceded_last_game",
+                   "home_team_win_percent_venue_last_5",
+                   "home_team_win_percent_venue_last_10",
+                   "home_team_win_percent_venue_last_15",
+                   "away_team_win_percent_venue_last_5",
+                   "away_team_win_percent_venue_last_10",
+                   "away_team_win_percent_venue_last_15",
+                   "home_team_lose_percent_venue_last_5",
+                   "home_team_lose_percent_venue_last_10",
+                   "home_team_lose_percent_venue_last_15",
+                   "away_team_lose_percent_venue_last_5",
+                   "away_team_lose_percent_venue_last_10",
+                   "away_team_lose_percent_venue_last_15",
+                   "home_team_goals_scored_venue_last_5",
+                   "home_team_goals_scored_venue_last_10",
+                   "home_team_goals_scored_venue_last_15",
+                   "away_team_goals_scored_venue_last_5",
+                   "away_team_goals_scored_venue_last_10",
+                   "away_team_goals_scored_venue_last_15",
+                   "home_team_goals_conceded_venue_last_5",
+                   "home_team_goals_conceded_venue_last_10",
+                   "home_team_goals_conceded_venue_last_15",
+                   "away_team_goals_conceded_venue_last_5",
+                   "away_team_goals_conceded_venue_last_10",
+                   "away_team_goals_conceded_venue_last_15",
+                   "hth_home_win_percent_last_5",
+                   "hth_home_win_percent_last_10",
+                   "hth_home_win_percent_last_15",
+                   "hth_home_lose_percent_last_5",
+                   "hth_home_lose_percent_last_10",
+                   "hth_home_lose_percent_last_15",
+                   "hth_home_goals_scored_last_5",
+                   "hth_home_goals_scored_last_10",
+                   "hth_home_goals_scored_last_15",
+                   "hth_home_goals_conceded_last_5",
+                   "hth_home_goals_conceded_last_10",
+                   "hth_home_goals_conceded_last_15"]
+
+    measures = pd.concat([measures, pd.DataFrame(columns=measures_list)])
+    max_index = max(measures.index)
+    percent_complete = 1
+    for index in measures.index:
+        measures.loc[index, measures_list] = measures_main(index, raw_data)
+        if 100 * index / max_index > percent_complete:
+            print("%s%%" % percent_complete)
+            percent_complete += 1
+    measures.to_csv("../data/processed/complete_measures.csv")
 
 if __name__ == "__main__":
     main()
