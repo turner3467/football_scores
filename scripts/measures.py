@@ -7,11 +7,11 @@ match_info = ["Season",
               "League",
               "Date",
               "HomeTeam",
-              "AwayTeam"]
+              "AwayTeam",
+              "FTR"]
 
 match_statistics = ["FTHG",
                     "FTAG",
-                    "FTR",
                     "HTHG",
                     "HTAG",
                     "HTR",
@@ -387,6 +387,7 @@ def main():
                    "hth_home_goals_conceded_last_15"]
 
     measures = pd.concat([measures, pd.DataFrame(columns=measures_list)])
+    measures = measures.drop(["Unnamed: 0", "index"], axis=1)
     max_index = max(measures.index)
     percent_complete = 1
     for index in measures.index:
