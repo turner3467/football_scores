@@ -36,10 +36,12 @@ match_statistics = ["FTHG",
                     "HBP",
                     "ABP"]
 
+
 def get_measures():
     """Returns measures dataframe.
 
-    If measures file does not exists, it uses a filtered down version of the raw historical scores csv.
+    If measures file does not exists, it uses a filtered down version
+    of the raw historical scores csv.
     """
 
     if os.path.isfile("../data/processed/measures.csv"):
@@ -47,14 +49,16 @@ def get_measures():
         measures.Date = pd.to_datetime(measures.Date)
         return measures
     else:
-        measures = pd.read_csv("../data/processed/historical_scores.csv", index_col=0)
+        measures = pd.read_csv("../data/processed/historical_scores.csv",
+                               index_col=0)
         measures = measures[match_info]
-        measures.Date = pd.to_datetime(measures.Date)
+        measures.Date = pd.to_datetime(measures.Date, dayfirst=True)
         measures = measures.reset_index()
         measures.to_csv("../data/processed/measures.csv")
         return measures
 
-## Helper functions
+
+# Helper functions
 def match_filter(df,
                  home_team,
                  away_team,
@@ -63,11 +67,11 @@ def match_filter(df,
                  head_to_head,
                  team):
     """Returns matches as dataframe filtered by team, venue, and last n games"""
-    
+
     cols_returned = ["HomeTeam", "AwayTeam", "FTR", "FTHG", "FTAG"]
     if head_to_head:
         df_filter = ((df.HomeTeam == home_team) & (df.AwayTeam == away_team)) | \
-                    ((df.HomeTeam == away_team) & (df.AwayTeam == home_team))        
+                    ((df.HomeTeam == away_team) & (df.AwayTeam == home_team))    
         temp_df = df[df_filter]
     elif venue == "home":
         temp_df = df[df.HomeTeam == home_team]
@@ -83,11 +87,13 @@ def match_filter(df,
         temp_df = temp_df.sort_values("Date", ascending=False).head(n_games)[cols_returned]
     return temp_df
 
-## Individual measure functions
+
+# Individual measure functions
 def team_win_percentage(df, home_team, away_team, n_games, venue, head_to_head, team):
     """Returns the team win percentage from last n games."""
 
-    temp_df = match_filter(df, home_team, away_team, n_games, venue, head_to_head, team)
+    temp_df = match_filter(df, home_team, away_team,
+                           n_games, venue, head_to_head, team)
     if len(temp_df) < n_games:
         return "NaN"
     if team == "home":
@@ -102,10 +108,12 @@ def team_win_percentage(df, home_team, away_team, n_games, venue, head_to_head, 
         output = wins.sum()
     return output
 
+
 def team_lose_percentage(df, home_team, away_team, n_games, venue, head_to_head, team):
     """Returns the team lose percentage from last n games."""
 
-    temp_df = match_filter(df, home_team, away_team, n_games, venue, head_to_head, team)
+    temp_df = match_filter(df, home_team, away_team,
+                           n_games, venue, head_to_head, team)
     if len(temp_df) < n_games:
         return "NaN"
     if team == "home":
@@ -120,10 +128,12 @@ def team_lose_percentage(df, home_team, away_team, n_games, venue, head_to_head,
         output = loses.sum()
     return output
 
+
 def goals_scored(df, home_team, away_team, n_games, venue, head_to_head, team):
     """Returns the goals scored by team from last n games."""
 
-    temp_df = match_filter(df, home_team, away_team, n_games, venue, head_to_head, team)
+    temp_df = match_filter(df, home_team, away_team,
+                           n_games, venue, head_to_head, team)
     if len(temp_df) < n_games:
         return "NaN"
     if team == "home":
@@ -134,10 +144,12 @@ def goals_scored(df, home_team, away_team, n_games, venue, head_to_head, team):
                  temp_df[temp_df.AwayTeam == away_team]["FTAG"].sum()
     return scored
 
+
 def goals_conceded(df, home_team, away_team, n_games, venue, head_to_head, team):
     """Returns the goals conceded by team from last n games."""
 
-    temp_df = match_filter(df, home_team, away_team, n_games, venue, head_to_head, team)
+    temp_df = match_filter(df, home_team, away_team,
+                           n_games, venue, head_to_head, team)
     if len(temp_df) < n_games:
         return "NaN"
     if team == "home":
@@ -148,7 +160,8 @@ def goals_conceded(df, home_team, away_team, n_games, venue, head_to_head, team)
                    temp_df[temp_df.AwayTeam == away_team]["FTHG"].sum()
     return conceded
 
-## Main measure function
+
+# Main measure function
 def measures_main(idx, df):
     """Return list of form based measures using individual helper functions."""
 
@@ -309,82 +322,83 @@ def measures_main(idx, df):
 
     return output_list
 
+
 def main():
     measures = get_measures()
 
     raw_data = pd.read_csv("../data/processed/historical_scores.csv", index_col=0)
     raw_data = raw_data[match_info + match_statistics]
-    raw_data.Date = pd.to_datetime(raw_data.Date)
+    raw_data.Date = pd.to_datetime(raw_data.Date, dayfirst=True)
     raw_data = raw_data.reset_index()
 
     measures_list = ["home_team_win_percent_last_5",
-                   "home_team_win_percent_last_10",
-                   "home_team_win_percent_last_15",
-                   "away_team_win_percent_last_5",
-                   "away_team_win_percent_last_10",
-                   "away_team_win_percent_last_15",
-                   "home_team_lose_percent_last_5",
-                   "home_team_lose_percent_last_10",
-                   "home_team_lose_percent_last_15",
-                   "away_team_lose_percent_last_5",
-                   "away_team_lose_percent_last_10",
-                   "away_team_lose_percent_last_15",
-                   "home_team_goals_scored_last_5",
-                   "home_team_goals_scored_last_10",
-                   "home_team_goals_scored_last_15",
-                   "away_team_goals_scored_last_5",
-                   "away_team_goals_scored_last_10",
-                   "away_team_goals_scored_last_15",
-                   "home_team_goals_conceded_last_5",
-                   "home_team_goals_conceded_last_10",
-                   "home_team_goals_conceded_last_15",
-                   "away_team_goals_conceded_last_5",
-                   "away_team_goals_conceded_last_10",
-                   "away_team_goals_conceded_last_15",
-                   "home_team_win_percent_last_game",
-                   "away_team_win_percent_last_game",
-                   "home_team_lose_percent_last_game",
-                   "away_team_lose_percent_last_game",
-                   "home_team_goals_scored_last_game",
-                   "away_team_goals_scored_last_game",
-                   "home_team_goals_conceded_last_game",
-                   "away_team_goals_conceded_last_game",
-                   "home_team_win_percent_venue_last_5",
-                   "home_team_win_percent_venue_last_10",
-                   "home_team_win_percent_venue_last_15",
-                   "away_team_win_percent_venue_last_5",
-                   "away_team_win_percent_venue_last_10",
-                   "away_team_win_percent_venue_last_15",
-                   "home_team_lose_percent_venue_last_5",
-                   "home_team_lose_percent_venue_last_10",
-                   "home_team_lose_percent_venue_last_15",
-                   "away_team_lose_percent_venue_last_5",
-                   "away_team_lose_percent_venue_last_10",
-                   "away_team_lose_percent_venue_last_15",
-                   "home_team_goals_scored_venue_last_5",
-                   "home_team_goals_scored_venue_last_10",
-                   "home_team_goals_scored_venue_last_15",
-                   "away_team_goals_scored_venue_last_5",
-                   "away_team_goals_scored_venue_last_10",
-                   "away_team_goals_scored_venue_last_15",
-                   "home_team_goals_conceded_venue_last_5",
-                   "home_team_goals_conceded_venue_last_10",
-                   "home_team_goals_conceded_venue_last_15",
-                   "away_team_goals_conceded_venue_last_5",
-                   "away_team_goals_conceded_venue_last_10",
-                   "away_team_goals_conceded_venue_last_15",
-                   "hth_home_win_percent_last_5",
-                   "hth_home_win_percent_last_10",
-                   "hth_home_win_percent_last_15",
-                   "hth_home_lose_percent_last_5",
-                   "hth_home_lose_percent_last_10",
-                   "hth_home_lose_percent_last_15",
-                   "hth_home_goals_scored_last_5",
-                   "hth_home_goals_scored_last_10",
-                   "hth_home_goals_scored_last_15",
-                   "hth_home_goals_conceded_last_5",
-                   "hth_home_goals_conceded_last_10",
-                   "hth_home_goals_conceded_last_15"]
+                     "home_team_win_percent_last_10",
+                     "home_team_win_percent_last_15",
+                     "away_team_win_percent_last_5",
+                     "away_team_win_percent_last_10",
+                     "away_team_win_percent_last_15",
+                     "home_team_lose_percent_last_5",
+                     "home_team_lose_percent_last_10",
+                     "home_team_lose_percent_last_15",
+                     "away_team_lose_percent_last_5",
+                     "away_team_lose_percent_last_10",
+                     "away_team_lose_percent_last_15",
+                     "home_team_goals_scored_last_5",
+                     "home_team_goals_scored_last_10",
+                     "home_team_goals_scored_last_15",
+                     "away_team_goals_scored_last_5",
+                     "away_team_goals_scored_last_10",
+                     "away_team_goals_scored_last_15",
+                     "home_team_goals_conceded_last_5",
+                     "home_team_goals_conceded_last_10",
+                     "home_team_goals_conceded_last_15",
+                     "away_team_goals_conceded_last_5",
+                     "away_team_goals_conceded_last_10",
+                     "away_team_goals_conceded_last_15",
+                     "home_team_win_percent_last_game",
+                     "away_team_win_percent_last_game",
+                     "home_team_lose_percent_last_game",
+                     "away_team_lose_percent_last_game",
+                     "home_team_goals_scored_last_game",
+                     "away_team_goals_scored_last_game",
+                     "home_team_goals_conceded_last_game",
+                     "away_team_goals_conceded_last_game",
+                     "home_team_win_percent_venue_last_5",
+                     "home_team_win_percent_venue_last_10",
+                     "home_team_win_percent_venue_last_15",
+                     "away_team_win_percent_venue_last_5",
+                     "away_team_win_percent_venue_last_10",
+                     "away_team_win_percent_venue_last_15",
+                     "home_team_lose_percent_venue_last_5",
+                     "home_team_lose_percent_venue_last_10",
+                     "home_team_lose_percent_venue_last_15",
+                     "away_team_lose_percent_venue_last_5",
+                     "away_team_lose_percent_venue_last_10",
+                     "away_team_lose_percent_venue_last_15",
+                     "home_team_goals_scored_venue_last_5",
+                     "home_team_goals_scored_venue_last_10",
+                     "home_team_goals_scored_venue_last_15",
+                     "away_team_goals_scored_venue_last_5",
+                     "away_team_goals_scored_venue_last_10",
+                     "away_team_goals_scored_venue_last_15",
+                     "home_team_goals_conceded_venue_last_5",
+                     "home_team_goals_conceded_venue_last_10",
+                     "home_team_goals_conceded_venue_last_15",
+                     "away_team_goals_conceded_venue_last_5",
+                     "away_team_goals_conceded_venue_last_10",
+                     "away_team_goals_conceded_venue_last_15",
+                     "hth_home_win_percent_last_5",
+                     "hth_home_win_percent_last_10",
+                     "hth_home_win_percent_last_15",
+                     "hth_home_lose_percent_last_5",
+                     "hth_home_lose_percent_last_10",
+                     "hth_home_lose_percent_last_15",
+                     "hth_home_goals_scored_last_5",
+                     "hth_home_goals_scored_last_10",
+                     "hth_home_goals_scored_last_15",
+                     "hth_home_goals_conceded_last_5",
+                     "hth_home_goals_conceded_last_10",
+                     "hth_home_goals_conceded_last_15"]
 
     measures = pd.concat([measures, pd.DataFrame(columns=measures_list)])
     measures = measures.drop(["Unnamed: 0", "index"], axis=1)

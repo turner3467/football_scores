@@ -1,0 +1,14 @@
+
+* Modelling
+** Multinomial logistic regression
+*** First run
+- Conducted on just complete observations
+- Overall accuracy 45%
+*** Actions [1/3]
+- [ ] Imputation
+- [X] Cross validation with ridge penalty
+  - Overall accuracy 46%
+- [ ] PCA to deal with collinearity
+** Random forest
+* Leauge positions
+- Scrape statto.com
