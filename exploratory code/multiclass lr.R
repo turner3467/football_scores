@@ -4,7 +4,8 @@ library(tidyr)
 library(dplyr)
 library(glmnet)
 
-measures <- read.csv("../data/processed/complete_measures.csv", stringsAsFactors = FALSE)
+measures <- read.csv("../data/processed/complete_measures.csv", stringsAsFactors = FALSE,
+                     na.string = "NaN")
 scores.map <- c("A"=-1, "D"=0, "H"=1)
 measures$scores <- scores.map[measures$scores]
 

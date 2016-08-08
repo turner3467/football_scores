@@ -45,12 +45,14 @@ def get_measures():
     """
 
     if os.path.isfile("../data/processed/measures.csv"):
-        measures = pd.read_csv("../data/processed/measures.csv")
+        measures = pd.read_csv("../data/processed/measures.csv",
+                               encoding="utf_8")
         measures.Date = pd.to_datetime(measures.Date)
         return measures
     else:
         measures = pd.read_csv("../data/processed/historical_scores.csv",
-                               index_col=0)
+                               index_col=0,
+                               encoding="utf_8")
         measures = measures[match_info]
         measures.Date = pd.to_datetime(measures.Date, dayfirst=True)
         measures = measures.reset_index()
@@ -326,7 +328,8 @@ def measures_main(idx, df):
 def main():
     measures = get_measures()
 
-    raw_data = pd.read_csv("../data/processed/historical_scores.csv", index_col=0)
+    raw_data = pd.read_csv("../data/processed/historical_scores.csv",
+                           index_col=0)
     raw_data = raw_data[match_info + match_statistics]
     raw_data.Date = pd.to_datetime(raw_data.Date, dayfirst=True)
     raw_data = raw_data.reset_index()
@@ -401,7 +404,6 @@ def main():
                      "hth_home_goals_conceded_last_15"]
 
     measures = pd.concat([measures, pd.DataFrame(columns=measures_list)])
-    measures = measures.drop(["Unnamed: 0", "index"], axis=1)
     max_index = max(measures.index)
     percent_complete = 1
     for index in measures.index:
@@ -409,7 +411,8 @@ def main():
         if 100 * index / max_index > percent_complete:
             print("%s%%" % percent_complete)
             percent_complete += 1
-    measures.to_csv("../data/processed/complete_measures.csv")
+    measures.to_csv("../data/processed/complete_measures.csv",
+                    encoding="utf_8")
 
 if __name__ == "__main__":
     main()

@@ -18,7 +18,7 @@ gg +  geom_violin()
 
 melt_df <- melt(measures[, c(27:37)])
 h <- ggplot(data = melt_df, aes(x=value))
-h + geom_histogram() + facet_wrap(~variable, scales = "free")
+h + geom_density() + facet_wrap(~variable, scales = "free")
 
 i <- ggplot(data = measures, aes(x=home_team_goals_conceded_last_10))
 i + geom_histogram()
