@@ -9,7 +9,7 @@ measures <- read.csv("../data/processed/complete_measures.csv", stringsAsFactors
 scores.map <- c("A"=-1, "D"=0, "H"=1)
 measures$scores <- scores.map[measures$scores]
 
-measures <- measures[, -c(1:6)]
+measures <- select(measures, -c(index, AwayTeam, Date, HomeTeam, League, Season))
 
 ## Dropping head to head columns with large number of missing values
 measures <- measures[, -grep("^hth.*(10|15)$", colnames(measures))]
