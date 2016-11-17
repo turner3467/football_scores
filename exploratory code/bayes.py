@@ -1,24 +1,34 @@
 import numpy as np
-from pymc3 import Model, Poisson
+import pymc3 as pm
+import matplotlib
 
 # Initialize team properties
-att_A, sigma_a_A = 1, 0.2
-def_A, sigma_d_A = 1, 0.2
-att_B, sigma_a_B = 1, 0.2
-def_B, sigma_d_B = 1, 0.2
+mu_a_A, sigma_a_A = 1, 0.2
+mu_d_A, sigma_d_A = 1, 0.2
+mu_a_B, sigma_a_B = 1, 0.2
+mu_d_B, sigma_d_B = 1, 0.2
 
 # Create game observation
-data = np.array([[5, 1]])
+home_goals = np.array([[10], [10]])
+away_goals = np.array([[1], [0]])
 
-basic_model = Model()
+basic_model = pm.Model()
 
 with basic_model:
-    att_A = Poisson("att_A", mu=sigma_a_A)
-    def_A = Poisson("def_A", mu=sigma_d_A)
-    att_B = Poisson("att_B", mu=sigma_a_B)
-    def_B = Poisson("def_B", mu=sigma_d_B)
+    att_A = pm.Normal("att_A", mu=mu_a_A, sd=sigma_a_A)
+    def_A = pm.Normal("def_A", mu=mu_d_A, sd=sigma_d_A)
+    att_B = pm.Normal("att_B", mu=mu_a_B, sd=sigma_a_B)
+    def_B = pm.Normal("def_B", mu=mu_d_B, sd=sigma_d_B)
 
-    lambda_x = att_A - def_B
-    lambda_y = att_B - def_A
+    lambda_x = 1.2 + att_A - def_B
+    lambda_y = 0.8 + att_B - def_A
 
-    res_A_B = Poisson(lambda_x) * Poisson(lambda_y)
+    home_score = pm.Poisson("home_score", mu=lambda_x, observed=home_goals)
+    away_score = pm.Poisson("away_score", mu=lambda_x, observed=away_goals)
+
+with basic_model:
+    start = pm.find_MAP()
+    step = pm.NUTS()
+    trace = pm.sample(2000, step, start=start)
+
+    a = pm.traceplot(trace)
