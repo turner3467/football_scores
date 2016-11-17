@@ -20,3 +20,5 @@ with basic_model:
 
     lambda_x = att_A - def_B
     lambda_y = att_B - def_A
+
+    res_A_B = Poisson(lambda_x) * Poisson(lambda_y)
