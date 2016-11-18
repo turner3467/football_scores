@@ -1,6 +1,8 @@
 import numpy as np
 import pymc3 as pm
-import matplotlib
+import theano.tensor as T
+
+from .dist_math import bound, factln, logpow
 
 # Initialize team properties
 mu_a_A, sigma_a_A = 1, 0.2
@@ -11,6 +13,20 @@ mu_d_B, sigma_d_B = 1, 0.2
 # Create game observation
 home_goals = np.array([[10], [10]])
 away_goals = np.array([[1], [0]])
+
+
+class JointScore(pm.Discrete):
+    def __init__(self, mu):
+        self.mu = mu
+
+    def logp(self, value):
+        mu = self.mu
+        log_prob = bound(
+            logpow(mu, value) - factln(value) - mu,
+            mu >= 0, value >= 0)
+        return T.switch(1 * T.eq(mu, 0) * T.eq(value, 0),
+                        0, log_prob)
+
 
 basic_model = pm.Model()
 
@@ -23,8 +39,8 @@ with basic_model:
     lambda_x = 1.2 + att_A - def_B
     lambda_y = 0.8 + att_B - def_A
 
-    home_score = pm.Poisson("home_score", mu=lambda_x, observed=home_goals)
-    away_score = pm.Poisson("away_score", mu=lambda_x, observed=away_goals)
+    home_score = JointScore("home_score", mu=lambda_x, observed=home_goals)
+    away_score = JointScore("away_score", mu=lambda_x, observed=away_goals)
 
 with basic_model:
     start = pm.find_MAP()
