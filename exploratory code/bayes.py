@@ -2,7 +2,7 @@ import numpy as np
 import pymc3 as pm
 import theano.tensor as T
 
-from .dist_math import bound, factln, logpow
+from pymc3.distributions.dist_math import bound, factln, logpow
 
 # Initialize team properties
 mu_a_A, sigma_a_A = 1, 0.2
@@ -10,22 +10,30 @@ mu_d_A, sigma_d_A = 1, 0.2
 mu_a_B, sigma_a_B = 1, 0.2
 mu_d_B, sigma_d_B = 1, 0.2
 
-# Create game observation
-home_goals = np.array([[10], [10]])
-away_goals = np.array([[1], [0]])
+# For joint prob dist
+scores = np.array([[2, 1], [3, 1], [3, 1]])
 
 
 class JointScore(pm.Discrete):
-    def __init__(self, mu):
-        self.mu = mu
+    def __init__(self, mu_x, mu_y, *args, **kwargs):
+        super(JointScore, self).__init__(*args, **kwargs)
+        self.mu_x = mu_x
+        self.mu_y = mu_y
 
     def logp(self, value):
-        mu = self.mu
-        log_prob = bound(
-            logpow(mu, value) - factln(value) - mu,
-            mu >= 0, value >= 0)
-        return T.switch(1 * T.eq(mu, 0) * T.eq(value, 0),
-                        0, log_prob)
+        value_x = value[0]
+        value_y = value[1]
+        mu_x = self.mu_x
+        mu_y = self.mu_y
+        log_prob_x = bound(
+            logpow(mu_x, value_x) - factln(value_x) - mu_x,
+            mu_x >= 0, value_x >= 0)
+        log_prob_y = bound(
+            logpow(mu_y, value_y) - factln(value_y) - mu_y,
+            mu_y >= 0, value_y >= 0)
+        return T.switch(1 * T.eq(mu_x, 0) * T.eq(value_x, 0) *
+                        T.eq(mu_y, 0) * T.eq(value_y, 0),
+                        0, log_prob_x * log_prob_y)
 
 
 basic_model = pm.Model()
@@ -39,8 +47,8 @@ with basic_model:
     lambda_x = 1.2 + att_A - def_B
     lambda_y = 0.8 + att_B - def_A
 
-    home_score = JointScore("home_score", mu=lambda_x, observed=home_goals)
-    away_score = JointScore("away_score", mu=lambda_x, observed=away_goals)
+    score = JointScore("score", mu_x=lambda_x, mu_y=lambda_y, observed=scores)
+
 
 with basic_model:
     start = pm.find_MAP()
