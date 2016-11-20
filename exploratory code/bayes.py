@@ -4,6 +4,7 @@ import theano.tensor as T
 
 from pymc3.distributions.dist_math import bound, factln, logpow
 
+# Dataset for 2 teams and 4 match
 # Initialize team properties
 mu_a_A, sigma_a_A = 0.2, 1
 mu_d_A, sigma_d_A = 0.2, 1
@@ -12,7 +13,7 @@ mu_d_B, sigma_d_B = 0.2, 1
 
 # For joint prob dist
 scores = np.array([[2, 1], [3, 1], [3, 1]])
-
+time = np.array([[0], [7], [6]]) # days between matches
 
 class JointScore(pm.Discrete):
     def __init__(self, mu_x, mu_y, *args, **kwargs):
@@ -56,3 +57,6 @@ with basic_model:
     trace = pm.sample(2000, step, start=start)
 
     a = pm.traceplot(trace)
+
+
+with dynamic_model:
