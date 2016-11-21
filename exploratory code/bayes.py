@@ -4,27 +4,12 @@ import theano.tensor as T
 
 from pymc3.distributions.dist_math import bound, factln, logpow
 
-# Dataset for 2 teams and 4 match
-# Initialize team properties
-mu_a_A, sigma_a_A = 0.2, 1
-mu_d_A, sigma_d_A = 0.2, 1
-mu_a_B, sigma_a_B = 0.2, 1
-mu_d_B, sigma_d_B = 0.2, 1
-
-# For joint prob dist
-scores = np.array([[2, 1], [3, 1], [3, 1]])
-time = np.array([[0], [7], [6]])  # days between matches
-
 # Vector model
-# Team priors
-att_prop = pm.Normal("att_pror",
-                     mu=0,
-                     sd=0.2,
-                     size=2)
-def_prop = pm.Normal("def_prop",
-                     mu=0,
-                     sd=0.2,
-                     size=2)
+# Vectors to describe matches
+home_team = np.array([[0], [0], [1], [1]])
+away_team = np.array([[1], [1], [0], [0]])
+scores = np.array([[5, 0], [5, 0], [0, 5], [0, 5]])
+time = np.array([[0], [1], [2], [3]])
 
 
 class JointScore(pm.Discrete):
@@ -34,10 +19,11 @@ class JointScore(pm.Discrete):
         self.mu_y = mu_y
 
     def logp(self, value):
-        value_x = value[0]
-        value_y = value[1]
+        value_x = value[0][0]
+        value_y = value[1][1]
         mu_x = self.mu_x
         mu_y = self.mu_y
+
         log_prob_x = bound(
             logpow(mu_x, value_x) - factln(value_x) - mu_x,
             mu_x >= 0, value_x >= 0)
@@ -52,18 +38,53 @@ class JointScore(pm.Discrete):
 basic_model = pm.Model()
 
 with basic_model:
-    att_A = pm.Normal("att_A", mu=mu_a_A, sd=sigma_a_A)
-    def_A = pm.Normal("def_A", mu=mu_d_A, sd=sigma_d_A)
-    att_B = pm.Normal("att_B", mu=mu_a_B, sd=sigma_a_B)
-    def_B = pm.Normal("def_B", mu=mu_d_B, sd=sigma_d_B)
+    # Team priors
+    att_prop = pm.Normal("att_pror",
+                         mu=0,
+                         sd=0.2,
+                         shape=2)
+    def_prop = pm.Normal("def_prop",
+                         mu=0,
+                         sd=0.2,
+                         shape=2)
 
-    lambda_x = T.exp(2.3 + att_A - def_B)
-    lambda_y = T.exp(1.4 + att_B - def_A)
+    atts = att_prop - T.mean(att_prop)
+    defs = def_prop - T.mean(def_prop)
 
-    score = JointScore("score", mu_x=lambda_x, mu_y=lambda_y, observed=scores)
+    lambda_home = T.exp(1 + atts[home_team] - defs[away_team])
+    lambda_away = T.exp(0.8 + atts[away_team] - defs[home_team])
+
+    score = JointScore("score",
+                       mu_x=lambda_home,
+                       mu_y=lambda_away,
+                       observed=scores)
 
 
-with basic_model:
+dynamic_model = pm.Model()
+
+with dynamic_model:
+    # Team priors
+    att_prop = pm.Normal("att_prop",
+                         mu=0,
+                         sd=0.2,
+                         shape=(4, 2))
+    def_prop = pm.Normal("def_prop",
+                         mu=0,
+                         sd=0.2,
+                         shape=(4, 2))
+
+    atts = att_prop - T.mean(att_prop)
+    defs = def_prop - T.mean(def_prop)
+
+    lambda_home = T.exp(1 + atts[time, home_team] - defs[time, away_team])
+    lambda_away = T.exp(0.8 + atts[time, away_team] - defs[time, home_team])
+
+    score = JointScore("score",
+                       mu_x=lambda_home,
+                       mu_y=lambda_away,
+                       observed=scores)
+
+with dynamic_model:
     start = pm.find_MAP()
     step = pm.NUTS()
     trace = pm.sample(2000, step, start=start)
