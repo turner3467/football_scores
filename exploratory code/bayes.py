@@ -13,7 +13,19 @@ mu_d_B, sigma_d_B = 0.2, 1
 
 # For joint prob dist
 scores = np.array([[2, 1], [3, 1], [3, 1]])
-time = np.array([[0], [7], [6]]) # days between matches
+time = np.array([[0], [7], [6]])  # days between matches
+
+# Vector model
+# Team priors
+att_prop = pm.Normal("att_pror",
+                     mu=0,
+                     sd=0.2,
+                     size=2)
+def_prop = pm.Normal("def_prop",
+                     mu=0,
+                     sd=0.2,
+                     size=2)
+
 
 class JointScore(pm.Discrete):
     def __init__(self, mu_x, mu_y, *args, **kwargs):
@@ -45,8 +57,8 @@ with basic_model:
     att_B = pm.Normal("att_B", mu=mu_a_B, sd=sigma_a_B)
     def_B = pm.Normal("def_B", mu=mu_d_B, sd=sigma_d_B)
 
-    lambda_x = 2.3 + att_A - def_B
-    lambda_y = 1.4 + att_B - def_A
+    lambda_x = T.exp(2.3 + att_A - def_B)
+    lambda_y = T.exp(1.4 + att_B - def_A)
 
     score = JointScore("score", mu_x=lambda_x, mu_y=lambda_y, observed=scores)
 
@@ -57,6 +69,3 @@ with basic_model:
     trace = pm.sample(2000, step, start=start)
 
     a = pm.traceplot(trace)
-
-
-with dynamic_model:
